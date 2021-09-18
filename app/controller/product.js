@@ -1,4 +1,4 @@
-const { Product } = require('../models/product');
+const { Product, UserProduct } = require('../models/product');
 const mongoose = require('mongoose');
 const helper = require('../common/helper')
 exports.createProduct = async (req, res) => {
@@ -21,7 +21,7 @@ exports.deleteProduct = async (req, res) => {
     let { id: productId } = req.params;
     if (mongoose.Types.ObjectId.isValid(productId)) {
         try {
-            let productRecord = await Product.findById(productId).exec();;
+            let productRecord = await Product.findById(productId).exec();
             if (productRecord) {
                 let result = await Product.findOneAndRemove({ _id: productId });
                 res.send(helper.respondWithResult(200, { message: "product deleted successfully", result }));
@@ -56,3 +56,39 @@ exports.getAllProducts = async (req, res) => {
     }
 };
 
+
+exports.assignProductToUser = async (req, res) => {
+    try {
+        let { userId, productId } = req.body
+        let newProduct = {
+            userId,
+            productId,
+        }
+        let productUserRecord = new UserProduct(newProduct)
+
+        let result = await productUserRecord.save();
+        res.send(helper.respondWithResult(200, { message: "product assigned to user successfully", result }));
+    } catch (err) {
+        res.send(helper.handleError(err));
+    }
+}
+
+
+
+exports.getUserProducts = async (req, res) => {
+    try {
+        let { userId , brand , category} = req.query;
+        let productRecord = await UserProduct.find({ "userId": userId }).exec();
+        console.log("productRecord" , productRecord);
+
+        // filter by category and brand name
+        const productIds = productRecord.map(v => v.productId)
+
+        let result = await Product.find( { _id: { $in: productIds }, brand , category } ).exec();
+        console.log("result" , result);
+
+        res.send(helper.respondWithResult(200, { message: "get all the user products", "result" : result }));
+    } catch (err) {
+        res.send(helper.handleError(err));
+    }
+}

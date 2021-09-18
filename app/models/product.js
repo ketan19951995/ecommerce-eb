@@ -18,8 +18,22 @@ const productSchema = new mongoose.Schema({
 const Product = mongoose.model("Product", productSchema);
 
 
+const productUserSchema = new mongoose.Schema({
+    userId: {
+        type: mongoose.Schema.Types.ObjectId,
+        required: true,
+    },
+    productId: {
+        type: mongoose.Schema.Types.ObjectId,
+        required: true,
+    },
+}, { versionKey: false })
+
+const UserProduct = mongoose.model("UserProduct", productUserSchema);
+
 
 
 module.exports = {
-    Product
+    Product,
+    UserProduct
 }
