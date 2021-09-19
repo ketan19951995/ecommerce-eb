@@ -1,4 +1,3 @@
-console.log("insde controler");
 const User = require('../models/user');
 const helper = require('../common/helper')
 const jwt = require('jsonwebtoken');
@@ -23,8 +22,12 @@ exports.signup = async (req, res) => {
         if (existingUser) {
             res.send(helper.respondWithResult(409, { message: "Email is already in use.", existingUser }));
         }
+        //create a new User 
         let result = await userRecord.save();
+        
         const verificationToken = await helper.generateVerificationToken(result._id);
+
+        // send verification email
         await helper.sendEmailWithVerificationLink(verificationToken, result.email);
         res.send(helper.respondWithResult(200, { message: "user registered successfully , please check your email", "result": verificationToken }));
     } catch (err) {
